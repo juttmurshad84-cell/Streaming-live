@@ -83,3 +83,11 @@ export async function listTeams(sportId?: string): Promise<Team[]> {
   const { data } = await q;
   return (data ?? []) as Team[];
 }
+
+/** Which of these matches the user has a reminder for (empty for guests). */
+export async function reminderSet(userId: string | null, matchIds: string[]): Promise<Set<string>> {
+  if (!userId || matchIds.length === 0 || fixtureMode()) return new Set();
+  const db = (await readDb())!;
+  const { data } = await db.from("match_reminders").select("match_id").eq("user_id", userId).in("match_id", matchIds);
+  return new Set((data ?? []).map((r) => r.match_id as string));
+}

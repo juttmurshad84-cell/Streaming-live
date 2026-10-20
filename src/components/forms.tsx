@@ -1,5 +1,6 @@
 "use client";
-import { createContext, useActionState, useContext, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import { createContext, useActionState, useContext, useEffect, type ReactNode } from "react";
 import { useFormStatus } from "react-dom";
 import { cn } from "@/lib/cn";
 import type { ActionState } from "@/app/actions/util";
@@ -15,6 +16,9 @@ export function ActionForm({ action, children, className, encType, onDone, id }:
     if (r?.ok) onDone?.();
     return r;
   }, null);
+  const router = useRouter();
+  const target = state?.ok && typeof state.data?.redirect === "string" ? (state.data.redirect as string) : null;
+  useEffect(() => { if (target) router.push(target); }, [target, router]);
   return (
     <form id={id} action={formAction} encType={encType} className={className} noValidate>
       <ErrorsCtx.Provider value={state?.fieldErrors ?? {}}>

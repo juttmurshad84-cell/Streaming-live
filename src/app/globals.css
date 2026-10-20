@@ -26,27 +26,66 @@ body::before { content: ""; position: fixed; inset: 0; pointer-events: none; z-i
 ::selection { background: rgb(37 99 235 / 0.5); }
 :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; border-radius: 6px; }
 
-@layer components {
-  .container-page { @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8; }
-  .card { @apply rounded-2xl border border-line bg-card shadow-card; }
-  .btn { @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50; }
-  .btn-primary { @apply btn bg-primary text-white hover:bg-primary-hover; }
-  .btn-secondary { @apply btn border border-line bg-surface text-fg hover:bg-card-hover; }
-  .btn-ghost { @apply btn text-muted hover:bg-card hover:text-fg; }
-  .btn-danger { @apply btn bg-live/15 text-red-300 hover:bg-live/25 border border-live/30; }
-  .btn-sm { @apply px-3 py-1.5 text-xs; }
-  .input { @apply w-full rounded-xl border border-line bg-surface px-3.5 py-2.5 text-sm text-fg placeholder:text-muted/70 transition-colors focus:border-accent focus:outline-none disabled:opacity-60; }
-  .label { @apply mb-1.5 block text-sm font-medium text-fg; }
-  .hint { @apply mt-1 text-xs text-muted; }
-  .field-error { @apply mt-1 text-xs text-red-400; }
-  .chip { @apply inline-flex items-center gap-1 rounded-full border border-line bg-surface px-2.5 py-1 text-xs font-medium text-muted; }
-  .prose-doc { @apply space-y-4 text-[15px] leading-7 text-muted; }
-  .prose-doc h2 { @apply mt-8 text-xl font-semibold text-fg; }
-  .prose-doc h3 { @apply mt-6 text-base font-semibold text-fg; }
-  .prose-doc a { @apply text-accent underline-offset-2 hover:underline; }
-  .prose-doc ul { @apply list-disc space-y-1.5 pl-6; }
-  .prose-doc ol { @apply list-decimal space-y-1.5 pl-6; }
-  .prose-doc strong { @apply text-fg; }
+@utility container-page {
+  @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+}
+
+@utility card {
+  @apply rounded-2xl border border-line bg-card shadow-card;
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+@utility btn-primary {
+  @apply btn bg-primary text-white hover:bg-primary-hover;
+}
+
+@utility btn-secondary {
+  @apply btn border border-line bg-surface text-fg hover:bg-card-hover;
+}
+
+@utility btn-ghost {
+  @apply btn text-muted hover:bg-card hover:text-fg;
+}
+
+@utility btn-danger {
+  @apply btn bg-live/15 text-red-300 hover:bg-live/25 border border-live/30;
+}
+
+@utility btn-sm {
+  @apply px-3 py-1.5 text-xs;
+}
+
+@utility input {
+  @apply w-full rounded-xl border border-line bg-surface px-3.5 py-2.5 text-sm text-fg placeholder:text-muted/70 transition-colors focus:border-accent focus:outline-none disabled:opacity-60;
+}
+
+@utility label {
+  @apply mb-1.5 block text-sm font-medium text-fg;
+}
+
+@utility hint {
+  @apply mt-1 text-xs text-muted;
+}
+
+@utility field-error {
+  @apply mt-1 text-xs text-red-400;
+}
+
+@utility chip {
+  @apply inline-flex items-center gap-1 rounded-full border border-line bg-surface px-2.5 py-1 text-xs font-medium text-muted;
+}
+
+@utility prose-doc {
+  @apply space-y-4 text-[15px] leading-7 text-muted;
+  & h2 { @apply mt-8 text-xl font-semibold text-fg; }
+  & h3 { @apply mt-6 text-base font-semibold text-fg; }
+  & a { @apply text-accent underline-offset-2 hover:underline; }
+  & ul { @apply list-disc space-y-1.5 pl-6; }
+  & ol { @apply list-decimal space-y-1.5 pl-6; }
+  & strong { @apply text-fg; }
 }
 
 @keyframes shimmer { 100% { transform: translateX(100%); } }

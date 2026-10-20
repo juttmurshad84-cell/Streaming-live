@@ -139,3 +139,26 @@ export async function saveRecordingSettingsAction(_p: ActionState, fd: FormData)
     return done("Recording settings saved. New streams use them immediately; existing inputs keep their reconnect window.");
   });
 }
+
+export async function runSportsSyncAction(): Promise<ActionState> {
+  return guard(async () => {
+    const user = await actionUser("admin");
+    const { hasSportsApi } = await import("@/lib/env");
+    if (!hasSportsApi()) return fail("SPORTS_API_KEY is not set. For TheSportsDB's free tier use the public key 123 (rate-limited, no livescores).");
+    const { syncSportsData } = await import("@/lib/sports/sync");
+    const s = await syncSportsData({ daysBack: 1, daysForward: 3 });
+    await (await db()).rpc("log_moderation_action", { p_action: "sports_sync_manual", p_target_type: "settings", p_target_id: user.id, p_metadata: JSON.parse(JSON.stringify(s)) });
+    revalidatePath("/admin/integrations");
+    return done(`Sync finished: ${JSON.stringify(s)}`);
+  });
+}
+
+export async function runMaintenanceAction(): Promise<ActionState> {
+  return guard(async () => {
+    await actionUser("admin");
+    const { runMaintenance } = await import("@/lib/maintenance");
+    const r = await runMaintenance();
+    revalidatePath("/admin/integrations");
+    return done(`Maintenance finished: ${JSON.stringify(r)}`);
+  });
+}

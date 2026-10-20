@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getCurrentUser, hasRole } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth";
 import { env } from "@/lib/env";
 import { getLiveInput, ProviderError } from "@/lib/providers/cloudflare";
 import { rateLimit } from "@/lib/security/rate-limit";
@@ -22,7 +22,6 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
   const { data: s } = await db!.from("streams").select("id, owner_id, source_type, provider_stream_id, status").eq("id", id).maybeSingle();
   // RLS lets staff read others' rows, but only the owner may see credentials.
   if (!s || s.owner_id !== user.id) return NextResponse.json({ error: "not found" }, { status: 404, headers: NO_STORE });
-  void hasRole;
   if (!s.provider_stream_id || !(s.source_type === "platform_rtmps" || s.source_type === "platform_webrtc")) {
     return NextResponse.json({ error: "this stream does not use platform ingest" }, { status: 400, headers: NO_STORE });
   }
