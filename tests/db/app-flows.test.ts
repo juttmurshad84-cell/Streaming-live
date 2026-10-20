@@ -151,3 +151,30 @@ describe("video & recording writes", () => {
     expect(await run(db, service, "delete from videos where id=$1 returning id", [v[0].id])).toHaveLength(1);
   });
 });
+
+describe("first-admin bootstrap (documented in docs/SETUP.md)", () => {
+  it("plain SQL cannot promote a user, but the documented transaction-local service-role setting can", async () => {
+    const first = await createUser(db, "first@x.io", "firstadmin");
+    await expect(db.query("update profiles set role='admin' where id=$1", [first])).rejects.toThrow();
+    await db.exec(`begin; select set_config('request.jwt.claim.role', 'service_role', true);
+      update profiles set role = 'admin' where id = (select id from auth.users where email = 'first@x.io'); commit;`);
+    const r = await db.query<{ role: string }>("select role from profiles where id=$1", [first]);
+    expect(r.rows[0].role).toBe("admin");
+  });
+});
+
+describe("schema-wide guarantees", () => {
+  it("row level security is enabled on every public table", async () => {
+    const r = await db.query<{ relname: string }>(
+      "select c.relname from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relkind='r' and not c.relrowsecurity",
+    );
+    expect(r.rows.map((x) => x.relname)).toEqual([]);
+  });
+  it("contains the 15 required tables", async () => {
+    const need = ["profiles","sports_categories","competitions","teams","matches","streams","stream_viewer_sessions","stream_recordings","videos","follows","favorites","chat_messages","notifications","reports","moderation_actions"];
+    const r = await db.query<{ tablename: string }>("select tablename from pg_tables where schemaname='public'");
+    const have = new Set(r.rows.map((x) => x.tablename));
+    expect(need.filter((t) => !have.has(t))).toEqual([]);
+  });
+});
+
