@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #080b12;
+  --color-surface: #0f1724;
+  --color-card: #151c2b;
+  --color-card-hover: #1a2336;
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-accent: #38bdf8;
+  --color-live: #ef4444;
+  --color-fg: #f8fafc;
+  --color-muted: #94a3b8;
+  --color-line: #263244;
+  --color-ok: #22c55e;
+  --color-warn: #f59e0b;
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --shadow-card: 0 1px 0 rgb(255 255 255 / 0.03) inset, 0 8px 24px -12px rgb(0 0 0 / 0.6);
+}
+
+html { color-scheme: dark; scroll-behavior: smooth; }
+body { background: var(--color-bg); color: var(--color-fg); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+body::before { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: -1;
+  background: radial-gradient(900px 400px at 10% -10%, rgb(37 99 235 / 0.14), transparent 60%), radial-gradient(700px 360px at 95% 0%, rgb(56 189 248 / 0.07), transparent 60%); }
+::selection { background: rgb(37 99 235 / 0.5); }
+:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; border-radius: 6px; }
+
+@utility container-page {
+  @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+}
+
+@utility card {
+  @apply rounded-2xl border border-line bg-card shadow-card;
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+@utility btn-primary {
+  @apply btn bg-primary text-white hover:bg-primary-hover;
+}
+
+@utility btn-secondary {
+  @apply btn border border-line bg-surface text-fg hover:bg-card-hover;
+}
+
+@utility btn-ghost {
+  @apply btn text-muted hover:bg-card hover:text-fg;
+}
+
+@utility btn-danger {
+  @apply btn bg-live/15 text-red-300 hover:bg-live/25 border border-live/30;
+}
+
+@utility btn-sm {
+  @apply px-3 py-1.5 text-xs;
+}
+
+@utility input {
+  @apply w-full rounded-xl border border-line bg-surface px-3.5 py-2.5 text-sm text-fg placeholder:text-muted/70 transition-colors focus:border-accent focus:outline-none disabled:opacity-60;
+}
+
+@utility label {
+  @apply mb-1.5 block text-sm font-medium text-fg;
+}
+
+@utility hint {
+  @apply mt-1 text-xs text-muted;
+}
+
+@utility field-error {
+  @apply mt-1 text-xs text-red-400;
+}
+
+@utility chip {
+  @apply inline-flex items-center gap-1 rounded-full border border-line bg-surface px-2.5 py-1 text-xs font-medium text-muted;
+}
+
+@utility prose-doc {
+  @apply space-y-4 text-[15px] leading-7 text-muted;
+  & h2 { @apply mt-8 text-xl font-semibold text-fg; }
+  & h3 { @apply mt-6 text-base font-semibold text-fg; }
+  & a { @apply text-accent underline-offset-2 hover:underline; }
+  & ul { @apply list-disc space-y-1.5 pl-6; }
+  & ol { @apply list-decimal space-y-1.5 pl-6; }
+  & strong { @apply text-fg; }
+}
+
+@keyframes shimmer { 100% { transform: translateX(100%); } }
+.skeleton { position: relative; overflow: hidden; background: var(--color-card); border-radius: 0.75rem; }
+.skeleton::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.05), transparent); animation: shimmer 1.4s infinite; }
+@keyframes pulse-live { 0%,100% { opacity: 1 } 50% { opacity: 0.35 } }
+.live-dot { animation: pulse-live 1.6s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .skeleton::after, .live-dot { animation: none; } html { scroll-behavior: auto; } }
+.scrollbar-thin { scrollbar-width: thin; scrollbar-color: var(--color-line) transparent; }
