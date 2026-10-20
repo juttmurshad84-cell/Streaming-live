@@ -25,7 +25,6 @@ export function Thumbnail({ src, alt, focusX = 50, focusY = 50, sportSlug, prior
         optimizable(src) ? (
           <Image src={src} alt={alt ?? ""} fill sizes={sizes} priority={priority} style={pos} className="object-cover transition-transform duration-300 group-hover:scale-[1.03]" />
         ) : (
-          // eslint-disable-next-line @next/next/no-img-element
           <img src={src} alt={alt ?? ""} loading={priority ? "eager" : "lazy"} decoding="async" style={pos} className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" />
         )
       ) : (
@@ -62,7 +61,6 @@ export function StatusBadge({ status, isFixture, className }: { status: string; 
 export function Avatar({ src, name, size = 32, className }: { src?: string | null; name: string; size?: number; className?: string }) {
   const style = { width: size, height: size, fontSize: size * 0.4 };
   if (src) {
-    // eslint-disable-next-line @next/next/no-img-element
     return <img src={src} alt="" width={size} height={size} loading="lazy" style={style} className={cn("shrink-0 rounded-full object-cover", className)} />;
   }
   return <span aria-hidden style={style} className={cn("grid shrink-0 place-items-center rounded-full bg-gradient-to-br from-primary to-accent font-bold text-white", className)}>{initials(name)}</span>;
@@ -71,7 +69,6 @@ export function Avatar({ src, name, size = 32, className }: { src?: string | nul
 export function TeamLogo({ team, size = 28 }: { team: { name: string; short_name?: string | null; logo_url?: string | null } | null | undefined; size?: number }) {
   if (!team) return <span style={{ width: size, height: size }} className="shrink-0 rounded-full bg-surface" aria-hidden />;
   if (team.logo_url) {
-    // eslint-disable-next-line @next/next/no-img-element
     return <img src={team.logo_url} alt="" width={size} height={size} loading="lazy" className="shrink-0 object-contain" style={{ width: size, height: size }} />;
   }
   return <span aria-hidden style={{ width: size, height: size, fontSize: size * 0.34 }} className="grid shrink-0 place-items-center rounded-full border border-line bg-surface font-bold text-muted">{(team.short_name ?? initials(team.name)).slice(0, 3)}</span>;

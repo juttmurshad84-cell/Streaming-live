@@ -110,6 +110,10 @@ create trigger profiles_protect before update on public.profiles
 create or replace function public.protect_profile_private() returns trigger
 language plpgsql security definer set search_path = '' as $$
 begin
+  if new.recording_approved is distinct from old.recording_approved
+     and not (public.is_admin() or public.is_service_role()) then
+    raise exception 'recording approval can only be changed by an admin' using errcode = '42501';
+  end if;
   if not (public.is_staff() or public.is_service_role()) then
     if new.recording_approved is distinct from old.recording_approved
        or new.strikes is distinct from old.strikes
@@ -298,6 +302,7 @@ begin
     if new.provider is not null or new.provider_stream_id is not null or new.source_health <> 'unknown' then
       raise exception 'provider fields are system-managed' using errcode = '42501';
     end if;
+    new.recording_enabled := false; -- recording is granted by the server after policy/quota checks
     return new;
   end if;
   if new.owner_id is distinct from old.owner_id and not public.is_admin() then
@@ -309,6 +314,7 @@ begin
      or new.ended_at is distinct from old.ended_at
      or new.source_health is distinct from old.source_health
      or new.peak_viewers is distinct from old.peak_viewers
+     or new.recording_enabled is distinct from old.recording_enabled
      or new.last_error is distinct from old.last_error then
     raise exception 'lifecycle/provider fields are system-managed' using errcode = '42501';
   end if;

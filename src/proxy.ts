@@ -9,7 +9,9 @@ export async function proxy(request: NextRequest) {
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   let response = NextResponse.next({ request });
   if (!url || !key) {
-    // Not configured: protected areas render their own "not configured" notice.
+    // Not configured: nobody can be signed in, so protected areas redirect to the login page (which explains why).
+    const path = request.nextUrl.pathname;
+    if (PROTECTED.some((p) => path === p || path.startsWith(p + "/"))) return NextResponse.redirect(new URL("/login?notice=not-configured", request.url));
     return response;
   }
 

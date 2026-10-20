@@ -107,7 +107,7 @@ export async function updateStreamAction(_p: ActionState, fd: FormData): Promise
     if (!parsed.success) return fail("Check the highlighted fields.", zodErrors(parsed.error));
     const v = parsed.data;
     const db = await dbOrThrow();
-    const { data: cur } = await db.from("streams").select("id, owner_id, status, source_type, visibility, recording_enabled").eq("id", id).maybeSingle();
+    const { data: cur } = await db.from("streams").select("id, owner_id, status, source_type, visibility, recording_enabled, provider_stream_id").eq("id", id).maybeSingle();
     if (!cur || (cur.owner_id !== user.id && !hasRole(user, "moderator"))) return fail("Stream not found.");
     if (cur.source_type === "platform_webrtc" && v.visibility === "private") return fail("Browser broadcasts cannot be private.", { visibility: "Not available for browser broadcasts" });
     let thumb: string | null;
@@ -123,8 +123,11 @@ export async function updateStreamAction(_p: ActionState, fd: FormData): Promise
     };
     if (thumb) patch.thumbnail_url = thumb;
     if (bool(fd, "remove_thumbnail") && !thumb) patch.thumbnail_url = null;
-    if (cur.status !== "live" && cur.source_type === "platform_rtmps" && fd.has("recording_enabled_present")) {
-      patch.recording_enabled = v.recording_enabled && (await recordingAllowedFor(cur.owner_id)).allowed;
+    // recording_enabled is system-managed (DB trigger): toggle it on the provider first, then record it with the service role.
+    let recordingChange: boolean | null = null;
+    if (cur.status !== "live" && cur.source_type === "platform_rtmps" && fd.has("recording_enabled_present") && v.recording_enabled !== cur.recording_enabled) {
+      if (v.recording_enabled && !(await recordingAllowedFor(cur.owner_id)).allowed) return fail("Recording is not available for your account.", { recording_enabled: "Not available" });
+      recordingChange = v.recording_enabled;
     }
     const newUrl = str(fd, "external_url");
     if (newUrl && !["platform_rtmps", "platform_webrtc"].includes(cur.source_type)) {
@@ -136,6 +139,15 @@ export async function updateStreamAction(_p: ActionState, fd: FormData): Promise
     }
     const { error } = await db.from("streams").update(patch).eq("id", id);
     if (error) return fail("Could not save changes.");
+    if (recordingChange !== null && cur.provider_stream_id) {
+      try {
+        await updateLiveInput(cur.provider_stream_id, { recording: { mode: recordingChange ? "automatic" : "off", requireSignedURLs: true, timeoutSeconds: (await getRecordingSettings()).reconnect_window_seconds } });
+        await createSupabaseAdminClient()?.from("streams").update({ recording_enabled: recordingChange }).eq("id", id);
+      } catch (e) {
+        logger.error("recording toggle failed", { error: errMessage(e) });
+        return fail("Your changes were saved, but the recording setting could not be changed at the streaming provider.");
+      }
+    }
     revalidatePath(`/watch/${id}`);
     revalidatePath("/dashboard/streams");
     return done("Changes saved.");

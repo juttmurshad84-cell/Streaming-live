@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { hoursAgoIso } from "@/lib/time";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EmptyState, PageHeader, Section } from "@/components/blocks";
@@ -27,7 +28,7 @@ export default async function SportPage({ params }: Props) {
   const user = await getCurrentUser();
   const [live, upcoming, finished, videos, comps, fav] = await Promise.all([
     listPublicStreams({ status: "live", sport: slug, pageSize: 8 }),
-    listMatches({ status: "upcoming", sport: slug, from: new Date(Date.now() - 3 * 3600_000).toISOString(), pageSize: 6 }),
+    listMatches({ status: "upcoming", sport: slug, from: hoursAgoIso(3), pageSize: 6 }),
     listMatches({ status: "completed", sport: slug, pageSize: 6 }),
     listPublicVideos({ sport: slug, pageSize: 8 }),
     listCompetitions(sport.id),

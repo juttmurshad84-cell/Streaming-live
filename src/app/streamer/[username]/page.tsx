@@ -36,7 +36,7 @@ export default async function StreamerPage({ params }: Props) {
   return (
     <div>
       <div className="relative h-36 w-full overflow-hidden bg-gradient-to-r from-primary/40 via-surface to-accent/20 sm:h-52">
-        {profile.banner_url && /* eslint-disable-next-line @next/next/no-img-element */ <img src={profile.banner_url} alt="" className="h-full w-full object-cover" />}
+        {profile.banner_url && <img src={profile.banner_url} alt="" className="h-full w-full object-cover" />}
         <div className="absolute inset-0 bg-gradient-to-t from-bg to-transparent" />
       </div>
       <div className="container-page -mt-10 sm:-mt-12">

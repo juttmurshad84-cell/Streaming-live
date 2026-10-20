@@ -35,7 +35,7 @@ export function LiveChat({ streamId, enabled, slowMode, signedIn, userId, canMod
 
   useEffect(() => {
     const sb = getBrowserSupabase();
-    if (!sb || !enabled) { setStatus("off"); return; }
+    if (!sb || !enabled) { void Promise.resolve().then(() => setStatus("off")); return; }
     let alive = true;
     (async () => {
       const { data } = await sb.from("chat_messages").select("id, user_id, body, created_at, author:profiles!chat_messages_user_id_fkey(display_name)").eq("stream_id", streamId).is("deleted_at", null).order("created_at", { ascending: false }).limit(60);

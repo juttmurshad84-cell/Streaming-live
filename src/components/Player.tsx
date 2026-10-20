@@ -7,40 +7,53 @@ type Props = { kind: "stream" | "video"; id: string; title: string; poster?: str
 
 const frame = "relative aspect-video w-full overflow-hidden rounded-2xl border border-line bg-black";
 
-export function Player({ kind, id, title, poster, autoPlay = true }: Props) {
+export function Player(props: Props) {
+  // Remount (and so reset all state) whenever the content changes.
+  return <PlayerInner key={`${props.kind}:${props.id}`} {...props} />;
+}
+
+type Fetched = { desc: PlaybackDescriptor | null; error: string | null } | { keep: true; error: string } | "aborted";
+
+async function fetchDescriptor(endpoint: string, signal?: AbortSignal): Promise<Fetched> {
+  try {
+    const r = await fetch(endpoint, { cache: "no-store", signal });
+    if (r.status === 404) return { desc: null, error: "This content is unavailable." };
+    if (r.status === 429) return { keep: true, error: "Too many requests — please wait a moment and retry." };
+    return { desc: (await r.json()) as PlaybackDescriptor, error: null };
+  } catch (e) {
+    if ((e as Error).name === "AbortError") return "aborted";
+    return { keep: true, error: "Could not load the player. Check your connection and retry." };
+  }
+}
+
+function PlayerInner({ kind, id, title, poster, autoPlay = true }: Props) {
   const [desc, setDesc] = useState<PlaybackDescriptor | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [nonce, setNonce] = useState(0);
 
-  const load = useCallback(async (endpoint: string, signal?: AbortSignal) => {
-    try {
-      const r = await fetch(endpoint, { cache: "no-store", signal });
-      if (r.status === 404) { setError("This content is unavailable."); setDesc(null); return; }
-      if (r.status === 429) { setError("Too many requests — please wait a moment and retry."); return; }
-      const j = (await r.json()) as PlaybackDescriptor;
-      setError(null);
-      setDesc(j);
-    } catch (e) {
-      if ((e as Error).name !== "AbortError") setError("Could not load the player. Check your connection and retry.");
-    }
+  const load = useCallback((endpoint: string, signal?: AbortSignal) => {
+    fetchDescriptor(endpoint, signal).then((r) => {
+      if (r === "aborted") return;
+      if ("keep" in r) { setError(r.error); return; }
+      setError(r.error);
+      setDesc(r.desc);
+    });
   }, []);
 
   useEffect(() => {
     const ac = new AbortController();
-    setDesc(null);
-    setError(null);
-    void load(`/api/playback/${kind}/${id}`, ac.signal);
+    load(`/api/playback/${kind}/${id}`, ac.signal);
     return () => ac.abort();
   }, [kind, id, nonce, load]);
 
   // A stream that is not live yet: re-check periodically so viewers see it start without refreshing.
   useEffect(() => {
     if (kind !== "stream" || desc?.kind !== "offline") return;
-    const t = setInterval(() => void load(`/api/playback/stream/${id}`), 20_000);
+    const t = setInterval(() => load(`/api/playback/stream/${id}`), 20_000);
     return () => clearInterval(t);
   }, [desc, kind, id, load]);
 
-  const retry = () => setNonce((n) => n + 1);
+  const retry = () => { setDesc(null); setError(null); setNonce((n) => n + 1); };
 
   if (error) return <Message tone="error" text={error} onRetry={retry} />;
   if (!desc) return <div className={frame} aria-busy="true" aria-label="Loading player"><div className="skeleton absolute inset-0 rounded-none" /></div>;
@@ -69,7 +82,7 @@ export function Player({ kind, id, title, poster, autoPlay = true }: Props) {
 function Message({ text, onRetry, tone, poster }: { text: string; onRetry?: () => void; tone?: "error"; poster?: string | null }) {
   return (
     <div className={frame} role={tone === "error" ? "alert" : "status"}>
-      {poster && /* eslint-disable-next-line @next/next/no-img-element */ <img src={poster} alt="" className="absolute inset-0 h-full w-full object-cover opacity-20" />}
+      {poster && <img src={poster} alt="" className="absolute inset-0 h-full w-full object-cover opacity-20" />}
       <div className="absolute inset-0 grid place-items-center bg-gradient-to-br from-surface to-bg p-6 text-center">
         <div className="max-w-md space-y-3">
           <p className={tone === "error" ? "text-red-300" : "text-fg"}>{text}</p>

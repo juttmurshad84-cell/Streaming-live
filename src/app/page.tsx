@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { hoursAgoIso } from "@/lib/time";
 import { EmptyState, Section } from "@/components/blocks";
 import { MatchCard, SportCard, StreamCard, StreamerCard, VideoCard } from "@/components/cards";
 import { StatusBadge, Thumbnail } from "@/components/media";
@@ -20,7 +21,7 @@ export default async function HomePage() {
     listPublicStreams({ status: "live", sort: "viewers", pageSize: 8 }),
     listSportsWithCounts(),
     listTrendingStreams(6),
-    listMatches({ status: "upcoming", from: new Date(Date.now() - 3 * 3600_000).toISOString(), pageSize: 6 }),
+    listMatches({ status: "upcoming", from: hoursAgoIso(3), pageSize: 6 }),
     listPublicVideos({ sort: "newest", pageSize: 8 }),
     listFeaturedStreamers(6),
   ]);

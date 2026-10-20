@@ -96,7 +96,7 @@ export function SportCard({ sport }: { sport: SportWithCounts }) {
   return (
     <Link href={`/sports/${sport.slug}`} className="group relative block overflow-hidden rounded-2xl border border-line">
       <div className="relative aspect-[4/3] w-full" style={{ background: sport.image_url ? undefined : `linear-gradient(135deg, ${meta.from}, ${meta.to})` }}>
-        {sport.image_url && /* eslint-disable-next-line @next/next/no-img-element */ <img src={sport.image_url} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />}
+        {sport.image_url && <img src={sport.image_url} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />}
         <div className="absolute inset-0 opacity-25" style={{ backgroundImage: "repeating-linear-gradient(115deg, rgb(255 255 255 / .1) 0 2px, transparent 2px 24px)" }} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
         <span className="absolute right-3 top-2 text-4xl transition-transform group-hover:scale-110" aria-hidden>{meta.emoji}</span>

@@ -50,7 +50,10 @@ export function GoLivePanel(props: Props) {
     } finally { setSyncing(false); }
   }, [props.streamId]);
 
-  useEffect(() => { void sync(); }, [sync]);
+  useEffect(() => {
+    const t = setTimeout(() => void sync(), 0);
+    return () => clearTimeout(t);
+  }, [sync]);
   useEffect(() => {
     const t = setInterval(() => { if (document.visibilityState === "visible") void sync(); }, 10_000);
     return () => clearInterval(t);

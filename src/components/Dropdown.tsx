@@ -8,7 +8,8 @@ export function Dropdown({ trigger, label, children, align = "right", className 
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const path = usePathname();
-  useEffect(() => setOpen(false), [path]);
+  const [lastPath, setLastPath] = useState(path);
+  if (lastPath !== path) { setLastPath(path); setOpen(false); } // close on route change
   useEffect(() => {
     if (!open) return;
     const down = (e: MouseEvent) => { if (!ref.current?.contains(e.target as Node)) setOpen(false); };

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { hoursAgoIso } from "@/lib/time";
 import { EmptyState, PageHeader, Pagination } from "@/components/blocks";
 import { MatchCard } from "@/components/cards";
 import { FilterBar } from "@/components/FilterBar";
@@ -14,7 +15,7 @@ export const dynamic = "force-dynamic";
 export default async function Page({ searchParams }: { searchParams: SearchParams }) {
   const { get, page } = await readParams(searchParams);
   const filters = { sport: get("sport"), language: get("language"), q: get("q"), competition: get("competition") };
-  const [user, sports, res] = await Promise.all([getCurrentUser(), listSports(), listMatches({ status: "upcoming", from: new Date(Date.now() - 3 * 3600_000).toISOString(), ...filters, page })]);
+  const [user, sports, res] = await Promise.all([getCurrentUser(), listSports(), listMatches({ status: "upcoming", from: hoursAgoIso(3), ...filters, page })]);
   const reminders = await reminderSet(user?.id ?? null, res.items.map((m) => m.id));
   return (
     <div className="container-page py-8">
